@@ -1,13 +1,13 @@
-import { defer, Subject, ObservableInput, OperatorFunction, ObservedValueOf, 
-   Observable } from "rxjs";
+import { Subject, ObservableInput, OperatorFunction, ObservedValueOf, 
+   from, GroupedObservable} from "rxjs";
 import { groupBy, mergeMap, switchMap, tap, finalize } from "rxjs/operators";
 
-export function switchMapByKey<T, K, R, O extends ObservableInput<any>>(
+export function switchMapByKey<T, K, O extends ObservableInput<any>>(
   keySelector: (value: T) => K,
   project: (value: T, index: number) => O
-): OperatorFunction<T, ObservedValueOf<O> | R> {
-  return (source:Observable<T>) => {
-    let vault: any = {};  
+): OperatorFunction<T, ObservedValueOf<O>> {
+  return (source) => {
+    let vault: any = {}; 
     return source.pipe(
       groupBy(
       (v) => {
@@ -18,16 +18,16 @@ export function switchMapByKey<T, K, R, O extends ObservableInput<any>>(
       item => item,
       group => vault[group.key]
       ),
-      mergeMap(group =>
+      mergeMap((group) =>
         group.pipe(
           switchMap((e, i) =>
-            defer(() => project(e, i)).pipe(
-              tap({ complete: () => { vault[group.key].complete(); }})
+            from(project(e, i)).pipe(
+              tap({complete: () => { vault[group.key].complete(); }})
              )
           ),
           finalize(() => { delete vault[group.key]; })
         )
-      )
+      ) as OperatorFunction<GroupedObservable<K, T>, ObservedValueOf<O>>
     )
   }
 }

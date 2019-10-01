@@ -1,14 +1,8 @@
-import { Observable, fromEvent, Subject, OperatorFunction, EMPTY } from 'rxjs';
+import { Observable, fromEvent, Subject } from 'rxjs';
 import {
-  tap,
-  groupBy,
-  timeoutWith,
-  ignoreElements,
-  map,
-  switchMap,
-  mergeAll
+  tap
 } from 'rxjs/operators';
-import { switchMapByKey } from './operator.ts'
+import { switchMapByKey } from "./operator";
 import { setButtonEmoji, clearOutput, addToOutput, Movie, toggleStatus } from './helpers';
 
 document.querySelector('#clear-output').addEventListener('click', clearOutput);
